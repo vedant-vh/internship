@@ -1,0 +1,50 @@
+<div class="row justify-content-center mt-5">
+    <div class="col-md-10 col-lg-8 text-center pt-5">
+        <h1 class="display-4 fw-bold mb-3">Welcome to DocuPortal</h1>
+        <p class="lead text-muted mb-5">Please select your login type to continue.</p>
+        
+        <div class="row g-4 justify-content-center">
+            <!-- Admin Selection -->
+            <div class="col-md-5">
+                <a href="/login/admin" class="text-decoration-none shadow-hover h-100">
+                    <div class="card h-100 border-0 shadow-sm py-5 px-4 transition-transform">
+                        <div class="display-1 text-primary mb-3">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h3 class="fw-bold">Administrator</h3>
+                        <p class="text-muted">Upload and manage templates, view system-wide history.</p>
+                        <div class="btn btn-primary mt-3">Admin Login</div>
+                    </div>
+                </a>
+            </div>
+            
+            <!-- User Selection -->
+            <div class="col-md-5">
+                <a href="/login/user" class="text-decoration-none shadow-hover h-100">
+                    <div class="card h-100 border-0 shadow-sm py-5 px-4 transition-transform">
+                        <div class="display-1 text-success mb-3">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <h3 class="fw-bold">Standard User</h3>
+                        <p class="text-muted">View existing templates and generate new documents.</p>
+                        <div class="btn btn-success mt-3">User Login</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="mt-5 pt-4">
+            <p class="text-muted">Don't have an account yet? <a href="/register" class="text-primary fw-bold">Register as a new user</a></p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-transform {
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+</style>

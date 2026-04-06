@@ -1,0 +1,29 @@
+<div class="row mb-4 align-items-center">
+    <div class="col-sm-8">
+        <h2 class="mb-0">Report Preview</h2>
+        <p class="text-muted mt-1 text-truncate"><%= fileName %></p>
+    </div>
+    <div class="col-sm-4 text-sm-end mt-3 mt-sm-0">
+        <button onclick="history.back()" class="btn btn-outline-secondary shadow-sm">← Back</button>
+    </div>
+</div>
+
+<div class="card shadow border-0 overflow-hidden mb-5">
+    <div class="card-header bg-dark text-white py-3">
+        <h5 class="mb-0">Visual Preview</h5>
+    </div>
+    <div class="card-body p-4 p-md-5 bg-light">
+        <div class="preview-content bg-white p-4 p-md-5 shadow-sm mx-auto"
+             style="max-width: 800px; min-height: 600px; border: 1px solid #dee2e6;">
+            <%- html %>
+        </div>
+    </div>
+</div>
+
+<style>
+    .preview-content { line-height: 1.7; font-family: 'Times New Roman', Times, serif; color: #333; }
+    .preview-content * { max-width: 100% !important; }
+    .preview-content table { width: 100% !important; border-collapse: collapse; margin-bottom: 1rem; }
+    .preview-content table td, .preview-content table th { border: 1px solid #ddd; padding: 8px; }
+    .preview-content img { max-width: 100%; height: auto; }
+</style>

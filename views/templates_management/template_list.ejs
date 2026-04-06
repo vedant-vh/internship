@@ -1,0 +1,69 @@
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="mb-0">Available Templates</h2>
+        <p class="text-muted mt-1">Select a template to generate a new document or view its details.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <% if (user.role === 'ADMIN') { %>
+            <a href="/templates/upload" class="btn btn-success shadow-sm">
+                + Upload New Template
+            </a>
+        <% } %>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <% if (templates.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-4">Template Name</th>
+                            <th scope="col">Created Date</th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% templates.forEach(template => { %>
+                            <tr>
+                                <td class="ps-4 fw-medium">
+                                    <%= template.name %>
+                                </td>
+                                <td>
+                                    <span class="text-muted"><%= template.createdAt.toLocaleString() %></span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a href="/forms/<%= template.id %>" class="btn btn-primary btn-sm px-3">
+                                            Generate
+                                        </a>
+                                        <a href="/templates/<%= template.id %>" class="btn btn-outline-secondary btn-sm">
+                                            Details
+                                        </a>
+                                        <% if (user.role === 'ADMIN') { %>
+                                            <form action="/templates/<%= template.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Note: This will remove the template from the portal, but will NOT delete the actual file on the server disk. Proceed?')">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    Delete
+                                                </button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <div class="text-muted mb-3" style="font-size: 3rem;">📄</div>
+                <h5 class="text-muted">No templates uploaded yet.</h5>
+                <p class="text-muted mb-4">Get started by uploading your first standard DOCX template.</p>
+                <a href="/templates/upload" class="btn btn-outline-success">
+                    Upload Template
+                </a>
+            </div>
+        <% } %>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+
+express (^5.2.1): Web application framework.
+- ejs (^5.0.1): Template engine for server-side UI rendering.
+- express-ejs-layouts (^2.5.1): Layout support for EJS.
+- morgan (^1.10.1): HTTP request logger.
+- dotenv (^17.3.1): Loads environment variables from a .env file.
+
+- passport (^0.7.0): Authentication middleware for Node.js.
+- passport-local (^1.0.0): Local username/password authentication strategy.
+- bcryptjs (^3.0.3): Library for hashing and comparing passwords.
+- express-session (^1.19.0): Session management for authenticated users.
+
+- pizzip (^3.2.0): Accesses Word document ZIP/XML structure.
+- xmldom (^0.6.0): DOM API for parsing and navigating document.xml.
+- mammoth (^1.12.0): Converts DOCX to HTML for web display/preview.
+
+- docxtemplater (^3.68.3): Main engine for placeholder replacement and table loops.
+- uuid (^13.0.0): Generates unique IDs for output filenames.
+- multer (^2.1.1): Middleware for handling multipart/form-data (file uploads).
+
+- prisma (^6.2.1): Database toolkit/ORM used to manage SQLite data.
+- @prisma/client (^6.2.1): Auto-generated query builder for the database.
+
+- nodemon (^3.1.14): Automatically restarts the server on file changes.
+- jest (^30.3.0): Testing framework for unit and integration tests.
+- supertest (^7.2.2): Library for testing HTTP servers.
+
+- services/templateParser.js: Logic for extraction of nested table structures.
+- services/formGenerator.js: Logic for dynamic UI generation from template data.
+- services/docxRenderer.js: Bridge between template XML and docxtemplater engine.

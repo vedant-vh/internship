@@ -1,0 +1,257 @@
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow border-0 mb-5">
+            <div class="card-header bg-dark text-white py-4 text-center">
+                <h3 class="mb-0">Generate Report</h3>
+                <p class="mb-0 opacity-75"><%= template.name %></p>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form id="report-form" method="POST" action="/report-generate/<%= template.id %>" enctype="multipart/form-data">
+
+                    <div class="row g-4">
+                        <% form_fields.forEach(field => { %>
+
+                            <%# ─── Dynamic Text Group (e.g. organizer, faculty, objective) ─── %>
+                            <% if (field.type === 'dynamic-text-group') { %>
+                                <div class="col-12 mt-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold mb-0"><%= field.label %></label>
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                onclick="addTextEntry('<%= field.name %>')">
+                                            + Add Entry
+                                        </button>
+                                    </div>
+                                    <div id="group-<%= field.name %>" class="d-flex flex-column gap-2">
+                                        <div class="input-group dynamic-text-entry">
+                                            <textarea name="<%= field.name %>[]" class="form-control" rows="2"
+                                                      placeholder="Enter <%= field.label %> entry..."></textarea>
+                                            <button type="button" class="btn btn-outline-danger"
+                                                    onclick="removeEntry(this, '<%= field.name %>')">×</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <%# ─── Dynamic Image Group (e.g. event_image, feedback_image) ─── %>
+                            <% } else if (field.type === 'dynamic-image-group') { %>
+                                <div class="col-12 mt-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label fw-bold mb-0"><%= field.label %></label>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary"
+                                                onclick="addImageEntry('<%= field.name %>')">
+                                            + Add Image
+                                        </button>
+                                    </div>
+                                    <div id="group-<%= field.name %>" class="d-flex flex-column gap-2">
+                                        <div class="input-group dynamic-image-entry">
+                                            <input type="file" name="<%= field.name %>[]" class="form-control"
+                                                   accept="image/*">
+                                            <button type="button" class="btn btn-outline-danger"
+                                                    onclick="removeEntry(this, '<%= field.name %>')">×</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <%# ─── Single Image Upload ─── %>
+                            <% } else if (field.type === 'image') { %>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <input type="file" name="<%= field.name %>[]" class="form-control" accept="image/*">
+                                    <div class="form-text">Upload an image for this placeholder.</div>
+                                </div>
+
+                            <%# ─── Date Field ─── %>
+                            <% } else if (field.type === 'date') { %>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <input type="date" name="<%= field.name %>" class="form-control">
+                                </div>
+
+                            <%# ─── Dynamic Table (Multi-column loop) ─── %>
+                            <% } else if (field.type === 'table') { %>
+                                <div class="col-12 mt-4 table-container" id="table-container-<%= field.name %>">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <label class="form-label fw-bold mb-0 text-primary">
+                                            <i class="fas fa-table me-2"></i><%= field.label %>
+                                        </label>
+                                        <button type="button" class="btn btn-sm btn-primary px-3 rounded-pill"
+                                                onclick="addTableRow('<%= field.name %>')">
+                                            <i class="fas fa-plus me-1"></i> Add Row
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="table-responsive rounded shadow-sm border">
+                                        <table class="table table-hover align-middle mb-0" id="table-<%= field.name %>">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <% field.columns.forEach(col => { %>
+                                                        <th class="py-3 text-uppercase font-size-xs text-muted fw-semibold">
+                                                            <%= col.label %>
+                                                        </th>
+                                                    <% }) %>
+                                                    <th style="width: 50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="bg-white">
+                                                <tr class="table-row-item">
+                                                    <% field.columns.forEach(col => { %>
+                                                        <td>
+                                                            <% if (col.type === 'srno') { %>
+                                                                <span class="badge bg-secondary-subtle text-secondary border px-2 py-1">Auto</span>
+                                                                <input type="hidden" name="<%= col.name %>" value="">
+                                                            <% } else if (col.type === 'date') { %>
+                                                                <input type="date" name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light">
+                                                            <% } else if (col.type === 'time') { %>
+                                                                <input type="time" name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light">
+                                                            <% } else { %>
+                                                                <textarea name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light-subtle" rows="1"></textarea>
+                                                            <% } %>
+                                                        </td>
+                                                    <% }) %>
+                                                    <td class="text-end pe-3">
+                                                        <button type="button" class="btn btn-link link-danger p-0 opacity-50 hover-opacity-100" 
+                                                                onclick="removeTableRow(this, '<%= field.name %>')">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <%# Hidden storage for the actual serialized JSON array of rows %>
+                                    <input type="hidden" id="hidden-<%= field.name %>" name="<%= field.name %>" value="">
+                                </div>
+
+                            <%# ─── Default: Long Textarea ─── %>
+                            <% } else { %>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <textarea name="<%= field.name %>" class="form-control" rows="3"
+                                              placeholder="Enter <%= field.label %>..."></textarea>
+                                </div>
+                            <% } %>
+
+                        <% }) %>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-top d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg shadow">
+                            Generate Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add FontAwesome for icons if not already in layout -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    .bg-light-subtle { background-color: #f8f9fa; }
+    .font-size-xs { font-size: 0.75rem; }
+    .hover-opacity-100:hover { opacity: 1 !important; }
+    .table-container { border-radius: 8px; }
+    .form-control:focus { background-color: #fff !important; border-color: #0d6efd !important; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important; }
+</style>
+
+<script>
+    function addTextEntry(groupName) {
+        const container = document.getElementById('group-' + groupName);
+        const div = document.createElement('div');
+        div.className = 'input-group dynamic-text-entry';
+        div.innerHTML = `
+            <textarea name="${groupName}[]" class="form-control" rows="2"
+                      placeholder="Enter entry..."></textarea>
+            <button type="button" class="btn btn-outline-danger"
+                    onclick="removeEntry(this, '${groupName}')">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function addImageEntry(groupName) {
+        const container = document.getElementById('group-' + groupName);
+        const div = document.createElement('div');
+        div.className = 'input-group dynamic-image-entry';
+        div.innerHTML = `
+            <input type="file" name="${groupName}[]" class="form-control" accept="image/*">
+            <button type="button" class="btn btn-outline-danger"
+                    onclick="removeEntry(this, '${groupName}')">×</button>
+        `;
+        container.appendChild(div);
+    }
+
+    function removeEntry(btn, groupName) {
+        const container = document.getElementById('group-' + groupName);
+        const entries = container.querySelectorAll('.dynamic-text-entry, .dynamic-image-entry');
+        if (entries.length > 1) {
+            btn.closest('.input-group').remove();
+        }
+    }
+
+    // ─── Table Management ───
+
+    function addTableRow(tableName) {
+        const tbody = document.querySelector(`#table-${tableName} tbody`);
+        const firstRow = tbody.querySelector('tr');
+        const newRow = firstRow.cloneNode(true);
+        
+        // Clear value of all inputs and textareas in the cloned row
+        newRow.querySelectorAll('input:not([type="hidden"]), textarea').forEach(input => {
+            input.value = '';
+        });
+        
+        tbody.appendChild(newRow);
+    }
+
+    function removeTableRow(btn, tableName) {
+        const tbody = document.querySelector(`#table-${tableName} tbody`);
+        const rows = tbody.querySelectorAll('.table-row-item');
+        if (rows.length > 1) {
+            btn.closest('tr').remove();
+        } else {
+            // If it's the last row, just clear it
+            rows[0].querySelectorAll('input, textarea').forEach(input => {
+                input.value = '';
+            });
+        }
+    }
+
+    // Intercept form submission to serialize table data
+    document.getElementById('report-form').addEventListener('submit', function(e) {
+        const tableContainers = document.querySelectorAll('.table-container');
+        
+        tableContainers.forEach(container => {
+            const tableId = container.id.replace('table-container-', '');
+            const table = document.getElementById('table-' + tableId);
+            const rows = table.querySelectorAll('.table-row-item');
+            const tableData = [];
+
+            rows.forEach(row => {
+                const rowData = {};
+                row.querySelectorAll('input, textarea, select').forEach(input => {
+                    if (input.name) {
+                        rowData[input.name] = input.value;
+                    }
+                });
+                
+                // Only add if row has some data (ignore empty rows unless it's just sr_no)
+                const hasRealData = Object.entries(rowData).some(([k, v]) => {
+                    const lowK = k.toLowerCase();
+                    const isSpecial = lowK.includes('sr_no') || lowK.includes('srno') || lowK.includes('sno') || lowK.includes('sl_no');
+                    return !isSpecial && v.trim() !== '';
+                });
+
+                if (hasRealData) {
+                    tableData.push(rowData);
+                }
+            });
+
+            const hiddenInput = document.getElementById('hidden-' + tableId);
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(tableData);
+            }
+        });
+    });
+</script>

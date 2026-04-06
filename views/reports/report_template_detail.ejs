@@ -1,0 +1,84 @@
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h2 class="mb-0"><%= template.name %></h2>
+        <p class="text-muted mt-1">Report template — manage and view generation history.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+        <a href="/report-forms/<%= template.id %>" class="btn btn-primary shadow-sm me-2">
+            Generate Report
+        </a>
+        <% if (user.role === 'ADMIN') { %>
+            <form action="/report-templates/<%= template.id %>/delete" method="POST" class="d-inline"
+                  onsubmit="return confirm('Remove this report template from the portal? (Files on disk are preserved.)')">
+                <button type="submit" class="btn btn-outline-danger shadow-sm">Delete</button>
+            </form>
+        <% } %>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Detected Placeholders</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <% fields.forEach(field => { %>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <div>
+                                <div class="fw-bold"><%= field.label %></div>
+                                <div class="small text-muted font-monospace">{{ <%= field.fieldName %> }}</div>
+                            </div>
+                            <div>
+                                <% if (field.fieldType === 'dynamic-image-group') { %>
+                                    <span class="badge bg-warning text-dark">Dynamic Images</span>
+                                <% } else if (field.fieldType === 'dynamic-text-group') { %>
+                                    <span class="badge bg-info text-dark">Dynamic List</span>
+                                <% } else if (field.fieldType === 'image') { %>
+                                    <span class="badge bg-secondary">Image Upload</span>
+                                <% } else if (field.fieldType === 'date') { %>
+                                    <span class="badge bg-light text-dark border">Date</span>
+                                <% } else { %>
+                                    <span class="badge bg-light text-dark border">Textarea</span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Generated Reports</h5>
+            </div>
+            <div class="card-body p-0">
+                <% if (generatedReports.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% generatedReports.forEach(report => { %>
+                            <div class="list-group-item py-3 px-4">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="small fw-bold"><%= report.createdAt.toLocaleDateString() %></div>
+                                        <div class="small text-muted"><%= report.createdAt.toLocaleTimeString() %></div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a href="/report-generate/preview/<%= report.id %>" class="btn btn-sm btn-outline-info">Preview</a>
+                                        <a href="/<%= report.filePath %>" class="btn btn-sm btn-outline-primary" download>Download</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <p class="text-muted">No reports generated yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>

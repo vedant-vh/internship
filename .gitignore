@@ -1,0 +1,26 @@
+# Node.js dependencies
+node_modules/
+
+# Keep environment variables out of version control
+.env
+
+# Prisma Database (uncomment if you want to push the seed db)
+prisma/*.sqlite3
+prisma/*.sqlite3-journal
+
+# User Uploads and Generated Files (Keep directory structure but ignore files)
+media/generated_docs/*
+media/generated_reports/*
+media/report_image_uploads/*
+media/report_templates/*
+media/templates/*
+
+# Project Specific
+xml_dump.txt
+xml_dump_utf8.txt
+tmp_doc.xml
+npm-debug.log*
+
+# OS specific files
+.DS_Store
+Thumbs.db

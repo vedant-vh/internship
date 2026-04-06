@@ -1,0 +1,32 @@
+<div class="row justify-content-center">
+    <div class="col-md-6 pt-5">
+        <div class="card shadow border-0 mt-5">
+            <div class="card-header bg-dark text-white text-center py-4">
+                <div class="mb-2"><i class="bi bi-shield-lock display-4"></i></div>
+                <h4 class="mb-0">Administrator Login</h4>
+                <p class="small text-muted mb-0">System Management & Templates</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <div class="alert alert-danger mb-4"><%= error %></div>
+                <% } %>
+                
+                <form action="/login/admin" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Admin Username</label>
+                        <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="e.g. admin" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" id="password" class="form-control form-control-lg" required>
+                    </div>
+                    <div class="d-grid gap-3">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Login as Administrator</button>
+                        <a href="/select-role" class="btn btn-outline-secondary">Go Back to Role Selection</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <p class="text-center mt-4 text-muted small">Access Restricted: Only authorized administrators may log in here.</p>
+    </div>
+</div>

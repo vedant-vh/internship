@@ -1,0 +1,187 @@
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow border-0 mb-5">
+            <div class="card-header bg-dark text-white py-4 text-center">
+                <h3 class="mb-0">Generate Document</h3>
+                <p class="mb-0 opacity-75"><%= template.name %></p>
+            </div>
+            
+            <div class="card-body p-4 p-md-5">
+                <form id="dynamic-form" method="POST" action="/generate/<%= template.id %>">
+                    
+                    <div class="row g-4">
+                        <% form_fields.forEach(field => { %>
+                            <% if (field.type === 'table') { %>
+                                <div class="col-12 mt-5">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0"><%= field.label %></h5>
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="addRow('<%= field.name %>')">
+                                            + Add Row
+                                        </button>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered" id="table-<%= field.name %>">
+                                            <thead class="bg-light">
+                                                <tr>
+                                                    <% field.columns.forEach(col => { %>
+                                                        <th><%= col.label %></th>
+                                                    <% }) %>
+                                                    <th style="width: 50px;"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr class="table-row">
+                                                    <% field.columns.forEach(col => { %>
+                                                         <td>
+                                                            <% if (col.type && col.type.startsWith('select:')) { 
+                                                                const options = col.type.split(':')[1].split(',');
+                                                            %>
+                                                                <select class="form-control form-control-sm" name="<%= field.name %>_<%= col.name %>[]">
+                                                                    <option value="">Select...</option>
+                                                                    <% options.forEach(opt => { %>
+                                                                        <option value="<%= opt %>"><%= opt %></option>
+                                                                    <% }) %>
+                                                                </select>
+                                                            <% } else if (col.type === 'srno') { %>
+                                                                <%# Hidden input so the key exists in the JSON row; renderer auto-fills the value %>
+                                                                <input type="hidden" name="<%= field.name %>_<%= col.name %>[]" value="">
+                                                                <span class="badge bg-secondary px-3 py-2 d-block text-center" title="Auto-generated">Auto</span>
+                                                            <% } else if (col.type === 'textarea') { %>
+                                                                <textarea class="form-control form-control-sm" name="<%= field.name %>_<%= col.name %>[]" rows="1"></textarea>
+                                                            <% } else { %>
+                                                                <input type="<%= col.type || 'text' %>" class="form-control form-control-sm" name="<%= field.name %>_<%= col.name %>[]">
+                                                            <% } %>
+                                                        </td>
+                                                    <% }) %>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn btn-none p-0 text-danger" onclick="removeRow(this)">
+                                                            &times;
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <input type="hidden" name="<%= field.name %>" id="hidden-<%= field.name %>">
+                                </div>
+                            <% } else if (field.type === 'textarea') { %>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <textarea name="<%= field.name %>" class="form-control" rows="3"></textarea>
+                                </div>
+                            <% } else if (field.type && field.type.startsWith('select:')) { 
+                                const options = field.type.split(':')[1].split(',');
+                            %>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <select name="<%= field.name %>" class="form-control">
+                                        <option value="">Select...</option>
+                                        <% options.forEach(opt => { %>
+                                            <option value="<%= opt %>"><%= opt %></option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+                            <% } else { %>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold"><%= field.label %></label>
+                                    <input type="<%= field.type || 'text' %>" name="<%= field.name %>" class="form-control">
+                                </div>
+                            <% } %>
+                        <% }) %>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-top d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg shadow">
+                            Generate Document
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addRow(tableName) {
+        const table = document.getElementById('table-' + tableName);
+        const tbody = table.querySelector('tbody');
+        const firstRow = tbody.querySelector('.table-row');
+        const newRow = firstRow.cloneNode(true);
+        
+        // Clear inputs
+        newRow.querySelectorAll('input, textarea, select').forEach(input => input.value = '');
+        
+        // Remove any date helper from cloned row
+        newRow.querySelectorAll('.date-helper').forEach(h => h.remove());
+
+        tbody.appendChild(newRow);
+    }
+
+    function removeRow(btn) {
+        const rows = btn.closest('tbody').querySelectorAll('.table-row');
+        if (rows.length > 1) {
+            btn.closest('tr').remove();
+        }
+    }
+
+    document.getElementById('dynamic-form').addEventListener('submit', function(e) {
+        // Find all tables and stringify their data into hidden inputs
+        const tables = document.querySelectorAll('table[id^="table-"]');
+        
+        tables.forEach(table => {
+            const tableName = table.id.replace('table-', '');
+            const tableData = [];
+            const rows = table.querySelectorAll('.table-row');
+            
+            rows.forEach(row => {
+                const rowObj = {};
+                const inputs = row.querySelectorAll('input, textarea, select');
+                
+                inputs.forEach(input => {
+                    const nameAttr = input.getAttribute('name');
+                    if (nameAttr && nameAttr.startsWith(tableName + '_')) {
+                        const colName = nameAttr.substring(tableName.length + 1).replace('[]', '');
+                        rowObj[colName] = input.value;
+                    }
+                });
+
+                // Only push rows where at least one NON-srno column has data
+                const realValues = Object.entries(rowObj)
+                    .filter(([col]) => !col.match(/^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i))
+                    .map(([, v]) => v);
+                if (realValues.some(val => val.trim() !== '')) {
+                    tableData.push(rowObj);
+                }
+            });
+            
+            const hiddenInput = document.getElementById('hidden-' + tableName);
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(tableData);
+            }
+        });
+    });
+
+    // Automatic day calculation for dates (using event delegation)
+    document.addEventListener('change', function(e) {
+        if (e.target.tagName === 'INPUT' && e.target.type === 'date') {
+            const input = e.target;
+            if (!input.value) {
+                const helper = input.nextElementSibling;
+                if (helper && helper.classList.contains('date-helper')) helper.remove();
+                return;
+            }
+            const d = new Date(input.value);
+            if (!isNaN(d.getTime())) {
+                const dayName = d.toLocaleDateString('en-GB', { weekday: 'long' });
+                let helper = input.nextElementSibling;
+                if (!helper || !helper.classList.contains('date-helper')) {
+                    helper = document.createElement('small');
+                    helper.classList.add('date-helper', 'text-muted', 'ms-2');
+                    input.parentNode.appendChild(helper);
+                }
+                helper.textContent = `(${dayName})`;
+            }
+        }
+    });
+</script>

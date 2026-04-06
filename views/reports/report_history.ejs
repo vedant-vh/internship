@@ -1,0 +1,54 @@
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="mb-0">Report History</h2>
+        <p class="text-muted mt-1">
+            <% if (user.role === 'ADMIN') { %>All generated reports across all users.<% } else { %>Your generated reports.<% } %>
+        </p>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <% if (history.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="ps-4">Report Template</th>
+                            <th scope="col">Generated On</th>
+                            <th scope="col" class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% history.forEach(report => { %>
+                            <tr>
+                                <td class="ps-4 fw-medium">
+                                    <%= report.reportTemplate ? report.reportTemplate.name : 'Deleted Template' %>
+                                </td>
+                                <td>
+                                    <span class="text-muted"><%= report.createdAt.toLocaleString() %></span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a href="/report-generate/preview/<%= report.id %>" class="btn btn-outline-info btn-sm">
+                                            Preview
+                                        </a>
+                                        <a href="/report-history/download/<%= report.id %>" class="btn btn-outline-primary btn-sm">
+                                            Download
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="text-center py-5">
+                <div class="text-muted mb-3" style="font-size: 3rem;">📋</div>
+                <h5 class="text-muted">No reports generated yet.</h5>
+                <a href="/report-templates" class="btn btn-outline-primary mt-3">Browse Report Templates</a>
+            </div>
+        <% } %>
+    </div>
+</div>

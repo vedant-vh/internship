@@ -1,0 +1,85 @@
+<div class="row mb-4 align-items-center">
+    <div class="col-md-7">
+        <h2 class="mb-0"><%= template.name %></h2>
+        <p class="text-muted mt-1">Manage this template and view its history.</p>
+    </div>
+    <div class="col-md-5 text-md-end mt-3 mt-md-0">
+        <a href="/forms/<%= template.id %>" class="btn btn-primary shadow-sm me-2">
+            <i class="bi bi-file-earmark-plus"></i> Generate Now
+        </a>
+        <% if (user.role === 'ADMIN') { %>
+            <form action="/templates/<%= template.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Note: This will remove the template and history from the portal, but will NOT delete the actual file on the server disk. Proceed?')">
+                <button type="submit" class="btn btn-outline-danger shadow-sm">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </form>
+        <% } %>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Detected Placeholders</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    <% fields.forEach(field => { %>
+                        <div class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
+                            <div>
+                                <div class="fw-bold"><%= field.label %></div>
+                                <div class="small text-muted">{{ <%= field.fieldName %> }}</div>
+                            </div>
+                            <div>
+                                <% if (field.fieldType === 'table') { %>
+                                    <span class="badge bg-warning text-dark">Dynamic Table</span>
+                                <% } else if (field.isTable) { %>
+                                    <span class="badge bg-info text-dark">Table Column</span>
+                                <% } else { %>
+                                    <span class="badge bg-light text-dark">Input: <%= field.fieldType %></span>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">Recent Generations</h5>
+            </div>
+            <div class="card-body p-0">
+                <% if (generatedDocuments.length > 0) { %>
+                    <div class="list-group list-group-flush">
+                        <% generatedDocuments.forEach(doc => { %>
+                            <div class="list-group-item py-3 px-4">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <div class="small fw-bold">Generated <%= doc.createdAt.toLocaleDateString() %></div>
+                                        <div class="small text-muted"><%= doc.createdAt.toLocaleTimeString() %></div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a href="/generate/preview/<%= doc.id %>" class="btn btn-sm btn-outline-info">
+                                            Preview
+                                        </a>
+                                        <a href="/<%= doc.filePath %>" class="btn btn-sm btn-outline-primary" download>
+                                            Download
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="text-center py-5">
+                        <p class="text-muted">No documents generated yet.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>

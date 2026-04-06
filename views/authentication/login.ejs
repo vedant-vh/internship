@@ -1,0 +1,25 @@
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0">Portal Login</h4>
+            </div>
+            <div class="card-body p-4">
+                <form action="/login" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" id="username" class="form-control" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2">Login to Portal</button>
+                        <a href="/register" class="btn btn-link">New user? Create an account</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
