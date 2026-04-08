@@ -8,7 +8,6 @@ const prisma = new PrismaClient();
 const ReportRenderer = require('../services/report/reportRenderer');
 const mammoth = require('mammoth');
 
-// Multer: store uploaded images in a temp folder, keep them for embedding
 const imageStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         const dir = 'media/report_image_uploads/';
@@ -21,7 +20,7 @@ const imageStorage = multer.diskStorage({
 });
 const upload = multer({ storage: imageStorage });
 
-// Preview a generated report
+
 router.get('/preview/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);
@@ -46,7 +45,7 @@ router.get('/preview/:id', async (req, res) => {
     }
 });
 
-// Generate report — accepts any number of image files via multipart
+// Generate report
 router.post('/:templateId', upload.any(), async (req, res) => {
     try {
         const templateId = parseInt(req.params.templateId);
@@ -71,8 +70,7 @@ router.post('/:templateId', upload.any(), async (req, res) => {
             }
         }
 
-        // Map uploaded image files into context
-        // Image files are submitted with fieldnames like: event_image[], feedback_image[]
+        
         const groupedImages = {};
         if (req.files && req.files.length > 0) {
             req.files.forEach(file => {
@@ -86,7 +84,6 @@ router.post('/:templateId', upload.any(), async (req, res) => {
         const action = req.body.action;
         delete context.action;
 
-        // Merge image groups into context
         Object.assign(context, groupedImages);
 
         const renderer = new ReportRenderer();
@@ -96,7 +93,7 @@ router.post('/:templateId', upload.any(), async (req, res) => {
 
         if (action === 'preview') {
             const result = await mammoth.convertToHtml({ path: outputPath });
-            // Delete the temporary file right away to preserve disk space
+    
             if (fs.existsSync(outputPath)) {
                 fs.unlinkSync(outputPath);
             }

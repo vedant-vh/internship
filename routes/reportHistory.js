@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
     res.render('reports/report_history', { history });
 });
 
-// Dedicated download route — uses res.download() with proper headers
 router.get('/download/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);

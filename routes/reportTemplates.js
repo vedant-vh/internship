@@ -28,12 +28,12 @@ router.get('/', async (req, res) => {
     res.render('reports/report_template_list', { templates });
 });
 
-// Upload form (admin only)
+// Upload
 router.get('/upload', isAdmin, (req, res) => {
     res.render('reports/upload_report_template');
 });
 
-// Handle upload + parse (admin only)
+// upload+parse
 router.post('/upload', isAdmin, upload.single('template_file'), async (req, res) => {
     try {
         const { name } = req.body;
@@ -86,7 +86,7 @@ router.get('/:id', async (req, res) => {
     });
 });
 
-// Delete (admin only) — DB records only, files preserved
+// Delete
 router.post('/:id/delete', isAdmin, async (req, res) => {
     try {
         await prisma.reportTemplate.delete({
@@ -99,7 +99,7 @@ router.post('/:id/delete', isAdmin, async (req, res) => {
     }
 });
 
-// Rename (admin only)
+// Rename
 router.post('/:id/rename', isAdmin, async (req, res) => {
     try {
         const id = parseInt(req.params.id);

@@ -5,7 +5,6 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { DOMParser, XMLSerializer } = require('xmldom');
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const SR_NO_RE = /^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i;
 
@@ -76,7 +75,7 @@ function autoFillSerialNumbers(rows) {
     });
 }
 
-// ─── DocxRenderer ──────────────────────────────────────────────────────────────
+
 
 class DocxRenderer {
     constructor(outputDir = null) {
@@ -132,28 +131,21 @@ class DocxRenderer {
         return cur;
     }
 
-    /**
-     * Decisive XML cleaning pass to join fragmented tags.
-     * Removes invisible noise like spellcheck markers and joins split runs.
-     */
+    
     cleanXml(xml) {
-        // 1. Remove spelling/proofing tags that Word inserts inside placeholders
+        
         xml = xml.replace(/<(w:proofErr|w:noBreakHyphen)[^>]*\/>/g, '');
         
-        // 2. Aggressively join adjacent text segments that were split into multiple runs
-        // but have NO formatting/layout elements in between.
-        // This is the #1 fix for docxtemplater "tag seen" issues.
+        
         xml = xml.replace(/<\/w:t><\/w:r><w:r(?: [^>]*)*>(?:<w:rPr(?:>.*?<\/w:rPr>|[^>]*\/>))?<w:t(?: [^>]*)*>/g, '');
         
-        // 3. Remove "exact" row height constraints in tables so rows automatically scale to fit content quantity
+        
         xml = xml.replace(/(\s)w:hRule="exact"/gi, '$1w:hRule="auto"');
         
         return xml;
     }
 
-    /**
-     * Consolidate text nodes within each run.
-     */
+    
     mergeTextNodes(docXml) {
         const rs = docXml.getElementsByTagName('w:r');
         for (let i = 0; i < rs.length; i++) {

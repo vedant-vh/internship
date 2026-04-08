@@ -7,15 +7,8 @@ function generateLabel(fieldName) {
         .join(' ');
 }
 
-/**
- * Build the form field definition array from the DB TemplateField rows.
- *
- * Grouping strategy (no metadata column required):
- *   Fields arrive ordered by id ASC (insertion order).
- *   Upload always writes:  table-root → its columns → next table-root → its columns → …
- *   So we walk the list: every time we see a 'table' root we start a new group,
- *   and every subsequent isTable column until the next root belongs to that group.
- */
+
+
 function generateFormDefinition(templateFields, loopTables = []) {
     const formDefinition = [];
     const normalFields   = [];

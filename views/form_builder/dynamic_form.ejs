@@ -232,6 +232,105 @@
     }
 
     document.getElementById('dynamic-form').addEventListener('submit', function(e) {
+        let isValid = true;
+        let errorMessages = [];
+
+        // 4) Make all fields mandatory (check visible inputs, except inside tables unless date/time)
+        const allVisibleInputs = document.querySelectorAll('input:not([type="hidden"]):not([type="file"]), select, textarea');
+        for (let input of allVisibleInputs) {
+            let isTableDateOrTime = false;
+            
+            if (input.closest('table')) {
+                const type = input.getAttribute('type');
+                if (type === 'date' || type === 'time') {
+                    isTableDateOrTime = true;
+                } else {
+                    continue; // Exclude normal table data
+                }
+            }
+
+            if (!input.value.trim() && !input.closest('.date-helper')) {
+                isValid = false;
+                input.classList.add('is-invalid');
+                
+                if (isTableDateOrTime) {
+                    const msg = 'Date and Time fields inside tables are strictly mandatory.';
+                    if (!errorMessages.includes(msg)) errorMessages.push(msg);
+                } else {
+                    const msg = 'All root fields are mandatory. Please fill in all general fields outside tables.';
+                    if (!errorMessages.includes(msg)) errorMessages.push(msg);
+                }
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        }
+
+        // 1) Marks should be numeric
+        for (let input of allVisibleInputs) {
+            const nameAttr = (input.getAttribute('name') || '').toLowerCase();
+            if (nameAttr.includes('marks')) {
+                if (isNaN(input.value.trim()) || input.value.trim() === '') {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    if (!errorMessages.includes('Fields requesting "marks" must contain only numeric values.')) {
+                        errorMessages.push('Fields requesting "marks" must contain only numeric values.');
+                    }
+                }
+            }
+        }
+
+        // 3) For time range, ensure from time is <= to time
+        document.querySelectorAll('.timerange-container').forEach(container => {
+            const fromInput = container.querySelector('.timerange-from');
+            const toInput = container.querySelector('.timerange-to');
+            const from = fromInput.value;
+            const to = toInput.value;
+            
+            if (from && to) {
+                if (from >= to) {
+                    isValid = false;
+                    fromInput.classList.add('is-invalid');
+                    toInput.classList.add('is-invalid');
+                    if (!errorMessages.includes('In Time ranges, the "From Time" must be strictly earlier than the "To Time".')) {
+                        errorMessages.push('In Time ranges, the "From Time" must be strictly earlier than the "To Time".');
+                    }
+                } else {
+                    fromInput.classList.remove('is-invalid');
+                    toInput.classList.remove('is-invalid');
+                }
+            }
+        });
+
+        // 2) Ensure start date is before end date (Scan within the same table row)
+        const allRows = document.querySelectorAll('.table-row, .sub-row');
+        allRows.forEach(row => {
+            const dateInputs = row.querySelectorAll('input[type="date"]');
+            let startDates = [];
+            let endDates = [];
+            
+            dateInputs.forEach(d => {
+                const name = (d.getAttribute('name') || '').toLowerCase();
+                if (name.includes('start')) startDates.push(d);
+                if (name.includes('end')) endDates.push(d);
+            });
+            
+            if (startDates.length > 0 && endDates.length > 0) {
+                // If there's multiple, just check the first pair in the row as standard matching
+                const sd = startDates[0];
+                const ed = endDates[0];
+                if (sd.value && ed.value) {
+                    if (new Date(sd.value) > new Date(ed.value)) {
+                        isValid = false;
+                        sd.classList.add('is-invalid');
+                        ed.classList.add('is-invalid');
+                        if (!errorMessages.includes('Start Date must be before the End Date.')) {
+                            errorMessages.push('Start Date must be before the End Date.');
+                        }
+                    }
+                }
+            }
+        });
+
         document.querySelectorAll('.timerange-container').forEach(container => {
             const from = container.querySelector('.timerange-from').value;
             const to = container.querySelector('.timerange-to').value;
@@ -300,9 +399,25 @@
                 }
             });
             
+            if (tableData.length === 0) {
+                isValid = false;
+                table.style.border = '2px solid red';
+                if (!errorMessages.includes('All tables must contain at least one row of data.')) {
+                    errorMessages.push('All tables must contain at least one row of data.');
+                }
+            } else {
+                table.style.border = '';
+            }
+
             const hiddenInput = document.getElementById('hidden-' + tableName);
             if (hiddenInput) hiddenInput.value = JSON.stringify(tableData);
         });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert("Validation Failed:\n\n- " + errorMessages.join("\n- "));
+            return false;
+        }
     });
 
     // Automatic day calculation for dates (using event delegation)

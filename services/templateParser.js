@@ -12,28 +12,27 @@ class TemplateParser {
     guessFieldType(fieldName) {
         const name = fieldName.toLowerCase();
 
-        // 0. Serial number column — auto-generated, hidden from user input
         const SR_NO_RE = /^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i;
         if (SR_NO_RE.test(name)) return 'srno';
 
-        // 1. Loop markers and special placeholders should be hidden
+       
         if (name.startsWith('#') || name.startsWith('/') || name.startsWith('^') || name.startsWith('%')) {
             return 'hidden';
         }
 
-        // 2. Specific types
+        // Specific types
         if (name.includes('time_range') || name.includes('time_duration')) return 'timerange';
         if (name.includes('date')) return 'date';
         if (name.includes('time')) return 'time';
         if (name.includes('email')) return 'email';
         
-        // 3. Dropdowns (ensure 'academic_year' doesn't match 'year' dropdown)
+        // Dropdowns
         if (/\byear\b/.test(name) && !name.includes('academic')) {
             return 'select:FE,SE,TE,BE';
         }
         if (name.includes('semester')) return 'select:1,2,3,4,5,6,7,8';
         
-        // 4. User's explicit Textarea list (MUST check before text whitelist)
+
         const textareaKeywords = [
             'note', 'color_code', 'topicwise_contents', 'references', 
             'remarks_by_coordinator', 'group_information', 'group_members', 
@@ -45,7 +44,8 @@ class TemplateParser {
             return 'textarea';
         }
 
-        // 5. User's explicit Text whitelist
+       
+
         const textKeywords = [
             'department', 'academic_year', 'day', 'coordinator', 'hod', 
             'branch', 'semester', 'number', 'incharge', 'supervisor', 
@@ -53,18 +53,18 @@ class TemplateParser {
         ];
 
         if (textKeywords.some(kw => name.includes(kw))) {
-            // Check for short identifiers with boundaries to avoids over-matching
+            
             const shortIds = ['fe', 'se', 'te', 'be'];
             if (shortIds.some(id => new RegExp(`\\b${id}\\b`).test(name))) {
                 return 'text';
             }
-            // If it matches a long keyword, it's text
+           
             if (textKeywords.filter(kw => !shortIds.includes(kw)).some(kw => name.includes(kw))) {
                 return 'text';
             }
         }
 
-        // 6. Default to textarea for unknown fields
+      
         return 'textarea';
     }
 
@@ -84,7 +84,7 @@ class TemplateParser {
         }
     }
 
-    // Helper to get text from nodes
+    
     getTextFromNode(node) {
         let text = "";
         const tNodes = node.getElementsByTagName('w:t');
@@ -96,7 +96,6 @@ class TemplateParser {
 
     getNormalizedText() {
         if (!this.documentXml) return "";
-        // Extract all text content from w:t nodes to avoid fragmented placeholders
         const tNodes = this.documentXml.getElementsByTagName('w:t');
         let fullText = "";
         for (let i = 0; i < tNodes.length; i++) {
@@ -118,7 +117,6 @@ class TemplateParser {
     extractLoopTables() {
         const text = this.getNormalizedText();
         const tables = [];
-        // Consistent, forgiving regex
         const loopRegex = /\{\s*%\s*tr\s+for\s+(\w+)\s+in\s+([\w.]+)\s*%\s*\}/g;
         let match;
         
