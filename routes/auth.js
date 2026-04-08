@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-router.get('/select-role', (req, res) => {
+router.get('/login', (req, res) => {
     res.render('authentication/role_selection');
 });
 
@@ -21,7 +21,7 @@ router.post('/login/admin', (req, res, next) => {
         
         if (user.role !== 'ADMIN') {
             req.logout(() => {});
-            return res.render('authentication/admin_login', { error: 'Unauthorized: This login is for administrators only.' });
+            return res.render('authentication/admin_login', { error: 'Unauthorized: This login is for Admins only.' });
         }
 
         req.logIn(user, (err) => {
@@ -41,13 +41,10 @@ router.post('/login/user', (req, res, next) => {
         if (err) return next(err);
         if (!user) return res.render('authentication/user_login', { error: 'Invalid username or password' });
         
-        // Users with ADMIN role can technically use the user interface too, but let's 
-        // enforce USER role if we want them strictly separated. 
-        // For now, let's allow both on the user page or strictly enforce USER.
-        // User requested "both should not have same page", implying strict separation.
+
         if (user.role !== 'USER') {
             req.logout(() => {});
-            return res.render('authentication/user_login', { error: 'Please use the Administrator login page.' });
+            return res.render('authentication/user_login', { error: 'Please use the Admin login page.' });
         }
 
         req.logIn(user, (err) => {
@@ -97,7 +94,7 @@ router.post('/register', async (req, res) => {
 router.get('/logout', (req, res) => {
     req.logout((err) => {
         if (err) return next(err);
-        res.redirect('/select-role');
+        res.redirect('/login');
     });
 });
 

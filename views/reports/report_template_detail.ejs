@@ -8,6 +8,9 @@
             Generate Report
         </a>
         <% if (user.role === 'ADMIN') { %>
+            <a href="/report-templates/<%= template.id %>/download" class="btn btn-outline-info shadow-sm me-2">
+                Download Core
+            </a>
             <form action="/report-templates/<%= template.id %>/delete" method="POST" class="d-inline"
                   onsubmit="return confirm('Remove this report template from the portal? (Files on disk are preserved.)')">
                 <button type="submit" class="btn btn-outline-danger shadow-sm">Delete</button>

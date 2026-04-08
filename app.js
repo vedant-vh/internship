@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const morgan = require('morgan');
@@ -6,12 +7,23 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
+
+let dbUrl = process.env.DATABASE_URL;
+if (dbUrl && dbUrl.startsWith('file:./') && !dbUrl.includes('/prisma/')) {
+    dbUrl = `file:${path.join(__dirname, 'prisma', dbUrl.substring(7))}`;
+}
+
+const prisma = new PrismaClient({
+    datasources: {
+        db: { url: dbUrl }
+    }
+});
 
 const expressLayouts = require('express-ejs-layouts');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+
+let PORT = parseInt(process.env.PORT) || 3000;
 
 // Configuration
 app.set('view engine', 'ejs');
@@ -43,7 +55,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// Passport Config
 passport.use(new LocalStrategy(async (username, password, done) => {
     try {
         const user = await prisma.user.findUnique({ where: { username } });
@@ -100,12 +111,32 @@ app.get('/', (req, res) => {
     if (req.isAuthenticated()) {
         res.redirect('/templates');
     } else {
-        res.redirect('/select-role');
+        res.redirect('/login');
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+
+
+function startServer(portToTry) {
+    const server = app.listen(portToTry);
+
+    server.on('listening', () => {
+        const addr = server.address();
+        const actualPort = typeof addr === 'string' ? addr : addr.port;
+        console.log(`\x1b[32m%s\x1b[0m`, `✔ Server is running on http://localhost:${actualPort}`);
+        if (dbUrl) console.log(`\x1b[36m%s\x1b[0m`, `ℹ Using Database: ${dbUrl}`);
+    });
+
+    server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+            console.warn(`⚠ Port ${portToTry} is busy, trying ${portToTry + 1}...`);
+            startServer(portToTry + 1);
+        } else {
+            console.error('✘ Server error:', err);
+        }
+    });
+}
+
+startServer(PORT);
 
 module.exports = app;

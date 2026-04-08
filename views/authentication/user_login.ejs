@@ -1,32 +1,53 @@
-<div class="row justify-content-center">
-    <div class="col-md-6 pt-5">
-        <div class="card shadow border-0 mt-5">
-            <div class="card-header bg-success text-white text-center py-4">
-                <div class="mb-2"><i class="bi bi-person-badge display-4"></i></div>
-                <h4 class="mb-0">Standard User Login</h4>
-                <p class="small text-muted text-white opacity-75 mb-0">Document Generation & History</p>
+<div class="row justify-content-center py-5">
+    <div class="col-md-5 mt-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-primary text-white text-center py-4 border-0">
+                <div class="mb-2"><i class="bi bi-person-workspace display-4"></i></div>
+                <h2 class="h4 mb-0 text-white">User Login</h2>
+                <p class="small opacity-75 mb-0">Document Generation Portal</p>
             </div>
             <div class="card-body p-4 p-md-5">
                 <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger mb-4"><%= error %></div>
+                    <div class="alert alert-danger d-flex align-items-center mb-4 small">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div><%= error %></div>
+                    </div>
                 <% } %>
                 
                 <form action="/login/user" method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">User Username</label>
-                        <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="e.g. jdoe123" required autofocus>
+                    <div class="mb-4">
+                        <label for="username" class="form-label small fw-bold text-uppercase tracking-wider">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" id="username" class="form-control bg-light border-0 py-2" placeholder="Your username" required autofocus>
+                        </div>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" id="password" class="form-control form-control-lg" required>
+                        <label for="password" class="form-label small fw-bold text-uppercase tracking-wider">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-key"></i></span>
+                            <input type="password" name="password" id="password" class="form-control bg-light border-0 py-2" required>
+                        </div>
                     </div>
-                    <div class="d-grid gap-3">
-                        <button type="submit" class="btn btn-success btn-lg shadow-sm">Login as Standard User</button>
-                        <a href="/register" class="btn btn-outline-primary">Don't have an account? Register Now</a>
-                        <a href="/select-role" class="btn btn-link text-muted">Go Back to Role Selection</a>
+                    <div class="d-grid gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Sign In to Portal</button>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <a href="/login" class="text-muted text-decoration-none small">
+                                <i class="bi bi-arrow-left me-1"></i> Role Selection
+                            </a>
+                            <a href="/register" class="text-primary text-decoration-none small fw-bold">
+                                Create Account <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .tracking-wider { letter-spacing: 0.05em; }
+    .input-group-text { color: var(--text-body); }
+    .card-header.bg-primary { background-color: var(--primary-navy) !important; border-bottom: 4px solid var(--accent-blue) !important; }
+</style>

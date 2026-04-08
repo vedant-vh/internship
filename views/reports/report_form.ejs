@@ -103,8 +103,22 @@
                                                                 <input type="date" name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light">
                                                             <% } else if (col.type === 'time') { %>
                                                                 <input type="time" name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light">
+                                                            <% } else if (col.type === 'timerange') { %>
+                                                                <div class="d-flex align-items-center gap-1 timerange-container">
+                                                                    <input type="time" class="form-control form-control-sm timerange-from border-0 bg-light" title="From">
+                                                                    <span class="text-muted small">to</span>
+                                                                    <input type="time" class="form-control form-control-sm timerange-to border-0 bg-light" title="To">
+                                                                    <input type="hidden" name="<%= col.name %>" class="timerange-combined">
+                                                                </div>
                                                             <% } else { %>
-                                                                <textarea name="<%= col.name %>" class="form-control form-control-sm border-0 bg-light-subtle" rows="1"></textarea>
+                                                                <% 
+                                                                    const isLong = col.label.toLowerCase().includes('roll no') || col.label.toLowerCase().includes('name') || col.label.toLowerCase().includes('guide');
+                                                                    const rowCount = isLong ? 3 : 1;
+                                                                %>
+                                                                <textarea name="<%= col.name %>" 
+                                                                          class="form-control form-control-sm border-0 bg-light-subtle auto-expand" 
+                                                                          rows="<%= rowCount %>"
+                                                                          oninput="autoResize(this)"></textarea>
                                                             <% } %>
                                                         </td>
                                                     <% }) %>
@@ -126,7 +140,8 @@
                             <% } else { %>
                                 <div class="col-12">
                                     <label class="form-label fw-bold"><%= field.label %></label>
-                                    <textarea name="<%= field.name %>" class="form-control" rows="3"
+                                    <textarea name="<%= field.name %>" class="form-control auto-expand" rows="3"
+                                              oninput="autoResize(this)"
                                               placeholder="Enter <%= field.label %>..."></textarea>
                                 </div>
                             <% } %>
@@ -134,9 +149,12 @@
                         <% }) %>
                     </div>
 
-                    <div class="mt-5 pt-3 border-top d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg shadow">
-                            Generate Report
+                    <div class="mt-5 pt-3 border-top d-flex gap-3 justify-content-end">
+                        <button type="submit" name="action" value="preview" class="btn btn-outline-info btn-lg shadow-sm px-md-5">
+                            <i class="bi bi-eye"></i> Generate & Preview
+                        </button>
+                        <button type="submit" name="action" value="download" class="btn btn-primary btn-lg shadow px-md-5">
+                            <i class="bi bi-download"></i> Generate & Download
                         </button>
                     </div>
                 </form>
@@ -154,15 +172,41 @@
     .hover-opacity-100:hover { opacity: 1 !important; }
     .table-container { border-radius: 8px; }
     .form-control:focus { background-color: #fff !important; border-color: #0d6efd !important; box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.1) !important; }
+
+    /* Auto-expand styles */
+    textarea.auto-expand {
+        resize: none;
+        overflow: hidden;
+        min-height: 38px;
+        transition: height 0.1s ease;
+    }
+
+    .timerange-container .form-control {
+        min-width: 80px;
+        padding: 0.25rem 0.4rem;
+    }
 </style>
 
 <script>
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('textarea.auto-expand').forEach(textarea => {
+            if (textarea.value) autoResize(textarea);
+        });
+    });
+
     function addTextEntry(groupName) {
         const container = document.getElementById('group-' + groupName);
         const div = document.createElement('div');
-        div.className = 'input-group dynamic-text-entry';
+        div.className = 'input-group dynamic-text-entry mt-2';
         div.innerHTML = `
-            <textarea name="${groupName}[]" class="form-control" rows="2"
+            <textarea name="${groupName}[]" class="form-control auto-expand" rows="2"
+                      oninput="autoResize(this)"
                       placeholder="Enter entry..."></textarea>
             <button type="button" class="btn btn-outline-danger"
                     onclick="removeEntry(this, '${groupName}')">×</button>
@@ -200,7 +244,13 @@
         // Clear value of all inputs and textareas in the cloned row
         newRow.querySelectorAll('input:not([type="hidden"]), textarea').forEach(input => {
             input.value = '';
+            if (input.tagName.toLowerCase() === 'textarea') {
+                input.style.height = ''; // Reset height to initial CSS default
+            }
         });
+
+        // Clear timerange hidden values
+        newRow.querySelectorAll('.timerange-combined').forEach(h => h.value = '');
         
         tbody.appendChild(newRow);
     }
@@ -220,6 +270,20 @@
 
     // Intercept form submission to serialize table data
     document.getElementById('report-form').addEventListener('submit', function(e) {
+        // First, combine all timerange fields
+        document.querySelectorAll('.timerange-container').forEach(container => {
+            const from = container.querySelector('.timerange-from').value;
+            const to = container.querySelector('.timerange-to').value;
+            const combinedInput = container.querySelector('.timerange-combined');
+            if (from && to) {
+                combinedInput.value = `${from} to ${to}`;
+            } else if (from || to) {
+                combinedInput.value = from || to;
+            } else {
+                combinedInput.value = '';
+            }
+        });
+
         const tableContainers = document.querySelectorAll('.table-container');
         
         tableContainers.forEach(container => {

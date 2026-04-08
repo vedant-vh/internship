@@ -6,7 +6,7 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 router.get('/', async (req, res) => {
-    // Admin sees everything, regular users only their own
+
     const whereClause = req.user.role === 'ADMIN' ? {} : { createdById: req.user.id };
     
     const history = await prisma.generatedDocument.findMany({
@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
     res.render('document_history/history_list', { history });
 });
 
-// Dedicated download route — uses res.download() with proper headers
+// download route
 router.get('/download/:id', async (req, res) => {
     try {
         const id = parseInt(req.params.id);

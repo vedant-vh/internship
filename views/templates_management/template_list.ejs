@@ -12,6 +12,14 @@
     </div>
 </div>
 
+<% if (templates.length > 0) { %>
+<div class="row mb-3">
+    <div class="col-md-5 mb-2 mt-md-0">
+        <input type="text" id="templateSearch" class="form-control shadow-sm" placeholder="Search templates by name...">
+    </div>
+</div>
+<% } %>
+
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <% if (templates.length > 0) { %>
@@ -26,7 +34,7 @@
                     </thead>
                     <tbody>
                         <% templates.forEach(template => { %>
-                            <tr>
+                            <tr class="template-row" data-name="<%= template.name %>">
                                 <td class="ps-4 fw-medium">
                                     <%= template.name %>
                                 </td>
@@ -42,6 +50,9 @@
                                             Details
                                         </a>
                                         <% if (user.role === 'ADMIN') { %>
+                                            <button type="button" class="btn btn-outline-info btn-sm" onclick="renameTemplate(this.getAttribute('data-id'), this.getAttribute('data-name'))" data-id="<%= template.id %>" data-name="<%= template.name %>">
+                                                Rename
+                                            </button>
                                             <form action="/templates/<%= template.id %>/delete" method="POST" class="d-inline" onsubmit="return confirm('Note: This will remove the template from the portal, but will NOT delete the actual file on the server disk. Proceed?')">
                                                 <button type="submit" class="btn btn-outline-danger btn-sm">
                                                     Delete
@@ -67,3 +78,43 @@
         <% } %>
     </div>
 </div>
+
+<script>
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('templateSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const term = this.value.toLowerCase();
+                const rows = document.querySelectorAll('.template-row');
+                rows.forEach(row => {
+                    const name = row.getAttribute('data-name').toLowerCase();
+                    if (name.includes(term)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+
+    // Rename functionality for Admin
+    function renameTemplate(id, currentName) {
+        const newName = prompt('Enter new template name:', currentName);
+        if (newName && newName.trim() !== '' && newName.trim() !== currentName) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/templates/' + id + '/rename';
+            
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'newName';
+            input.value = newName.trim();
+            
+            form.appendChild(input);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+</script>

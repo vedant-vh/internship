@@ -22,6 +22,7 @@ class TemplateParser {
         }
 
         // 2. Specific types
+        if (name.includes('time_range') || name.includes('time_duration')) return 'timerange';
         if (name.includes('date')) return 'date';
         if (name.includes('time')) return 'time';
         if (name.includes('email')) return 'email';

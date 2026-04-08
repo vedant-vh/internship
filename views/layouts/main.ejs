@@ -3,50 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocuPortal | <%= typeof title !== 'undefined' ? title : 'Document Portal' %></title>
+    <title>DocuPortal | <%= typeof title !== 'undefined' ? title : 'Document Management Portal' %></title>
     
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts: Inter for Professional Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        :root {
+            --primary-navy: #0a192f;
+            --secondary-slate: #1f2937;
+            --accent-blue: #0ea5e9;
+            --bg-light: #f8fafc;
+            --text-heading: #1e293b;
+            --text-body: #475569;
+        }
+
         body {
-            background-color: #f8f9fa;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-body);
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Professional Typography */
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--text-heading);
+            font-weight: 700;
+        }
+
+        /* Institutional Navbar */
+        .navbar {
+            background-color: var(--primary-navy) !important;
+            padding: 1rem 0;
+            border-bottom: 3px solid var(--accent-blue);
         }
         .navbar-brand {
-            font-weight: bold;
-            letter-spacing: 0.5px;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+            color: #fff !important;
         }
+        .nav-link {
+            font-weight: 500;
+            color: rgba(255,255,255,0.85) !important;
+            transition: color 0.2s ease;
+        }
+        .nav-link:hover {
+            color: var(--accent-blue) !important;
+        }
+
+        /* Refined Cards */
+        .card {
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            background: #fff;
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-weight: 600;
+            padding: 1.25rem;
+        }
+
+        /* Professional Buttons */
+        .btn {
+            border-radius: 8px;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background-color: var(--accent-blue);
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #0284c7;
+            transform: translateY(-1px);
+        }
+        .btn-dark {
+            background-color: var(--primary-navy);
+            border: none;
+        }
+
         main {
             flex: 1;
         }
+
+        /* Professional Footer */
         .footer {
-            background-color: #e9ecef;
-            color: #6c757d;
+            background-color: var(--secondary-slate);
+            color: rgba(255,255,255,0.6);
+            padding: 2.5rem 0;
+            margin-top: 5rem;
         }
-        /* Custom styles for premium look */
-        .card {
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.2s;
+        .footer small {
+            font-size: 0.85rem;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+
+        /* Custom Alert Styles */
+        .alert {
+            border-radius: 8px;
             border: none;
-        }
-        .btn-success {
-            background: linear-gradient(135deg, #198754, #157347);
-            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
     </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/templates">
-                📑 DocuPortal
+            <a class="navbar-brand d-flex align-items-center" href="/templates">
+                <i class="bi bi-file-earmark-text-fill text-info me-2"></i>
+                <span>DocuPortal</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -54,34 +131,54 @@
             </button>
             
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-center">
                     <% if (typeof user !== 'undefined' && user) { %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/templates">Templates</a>
+                        <!-- Documents Menu -->
+                        <li class="nav-item dropdown px-2">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Documents
+                            </a>
+                            <ul class="dropdown-menu shadow-lg border-0 mt-2">
+                                <li><a class="dropdown-item py-2" href="/templates"><i class="bi bi-files me-2"></i> View Templates</a></li>
+                                <li><a class="dropdown-item py-2" href="/history"><i class="bi bi-clock-history me-2"></i> Document History</a></li>
+                                <% if (user.role === 'ADMIN') { %>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2" href="/templates/upload"><i class="bi bi-file-earmark-plus me-2 text-primary"></i> Upload Doc Template</a></li>
+                                <% } %>
+                            </ul>
                         </li>
-                        <% if (user.role === 'ADMIN') { %>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/templates/upload">Upload Template</a>
-                            </li>
-                        <% } %>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/history">Document History</a>
+
+                        <!-- Reports Menu -->
+                        <li class="nav-item dropdown px-2">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Reports
+                            </a>
+                            <ul class="dropdown-menu shadow-lg border-0 mt-2">
+                                <li><a class="dropdown-item py-2" href="/report-templates"><i class="bi bi-file-bar-graph me-2"></i> Report Templates</a></li>
+                                <li><a class="dropdown-item py-2" href="/report-history"><i class="bi bi-clipboard-data me-2"></i> Report History</a></li>
+                                <% if (user.role === 'ADMIN') { %>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2" href="/report-templates/upload"><i class="bi bi-plus-square me-2 text-success"></i> Upload Report Template</a></li>
+                                <% } %>
+                            </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/report-templates">Reports</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/report-history">Report History</a>
-                        </li>
-                        <li class="nav-item">
-                            <span class="nav-link text-light opacity-75">Welcome, <%= user.username %></span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/logout">Logout</a>
+
+                        <!-- User Profile -->
+                        <li class="nav-item ms-lg-3">
+                            <div class="dropdown">
+                                <button class="btn btn-dark btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-person-circle me-1"></i> <%= user.username %>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
+                                    <li><div class="dropdown-header text-uppercase small py-1">Role: <%= user.role %></div></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item py-2 text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                                </ul>
+                            </div>
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/select-role">Login</a>
+                            <a class="btn btn-outline-light btn-sm ms-2 px-4 shadow-sm" href="/login">Portal Login</a>
                         </li>
                     <% } %>
                 </ul>
@@ -89,16 +186,22 @@
         </div>
     </nav>
 
-    <main class="container mt-4 mb-5">
+    <main class="container py-5">
         <%- body %>
     </main>
 
-    <footer class="footer py-3 text-center mt-auto">
+    <footer class="footer text-center">
         <div class="container">
-            <small>&copy; <%= new Date().getFullYear() %> College Document Template Portal. All rights reserved.</small>
+            <div class="mb-3">
+                <h5 class="text-white mb-1">Document Management System</h5>
+                <p class="small mb-0">Portal for Template Parsing & Report Generation</p>
+            </div>
+            <hr class="border-secondary mb-3 opacity-25">
+            <small>&copy; <%= new Date().getFullYear() %> DocuPortal. All Rights Reserved.</small>
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <%- typeof scripts !== 'undefined' ? scripts : '' %>
     

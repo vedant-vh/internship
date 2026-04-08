@@ -22,7 +22,7 @@ router.get('/preview/:id', async (req, res) => {
         }
 
         const result = await mammoth.convertToHtml({ path: fullPath });
-        const html = result.value; // The generated HTML
+        const html = result.value; // generated HTML
         
         res.render('docGen/preview', { 
             html, 
@@ -44,15 +44,17 @@ router.post('/:templateId', async (req, res) => {
 
         if (!template) return res.status(404).send('Template not found');
 
+        const action = req.body.action;
         const context = { ...req.body };
-        delete context._csrf; 
+        delete context._csrf;
+        delete context.action;
 
         for (const key in context) {
             if (typeof context[key] === 'string' && context[key].startsWith('[') && context[key].endsWith(']')) {
                 try {
                     context[key] = JSON.parse(context[key]);
                 } catch (e) {
-                    // Stay as string if not valid JSON
+                    // Stay as string if not valid json
                 }
             }
         }
@@ -62,7 +64,20 @@ router.post('/:templateId', async (req, res) => {
 
         if (!outputPath) return res.status(500).send('Error generating document');
 
-        // Save to history
+        if (action === 'preview') {
+            const result = await mammoth.convertToHtml({ path: outputPath });
+            // Delete the temporary file right away to preserve disk space
+            if (fs.existsSync(outputPath)) {
+                fs.unlinkSync(outputPath);
+            }
+            return res.render('docGen/preview', { 
+                html: result.value, 
+                title: 'Document Preview',
+                fileName: 'Temporary Preview Only (Not Saved)'
+            });
+        }
+
+        // Save to history (if downloading)
         const relativePath = path.relative(process.cwd(), outputPath).replace(/\\/g, '/');
         await prisma.generatedDocument.create({
             data: {

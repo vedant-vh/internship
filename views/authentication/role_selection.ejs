@@ -1,50 +1,70 @@
-<div class="row justify-content-center mt-5">
-    <div class="col-md-10 col-lg-8 text-center pt-5">
-        <h1 class="display-4 fw-bold mb-3">Welcome to DocuPortal</h1>
-        <p class="lead text-muted mb-5">Please select your login type to continue.</p>
+<div class="row justify-content-center py-5">
+    <div class="col-md-10 col-lg-8 text-center mt-5">
+        <h1 class="display-3 fw-bold mb-3">Document Portal</h1>
+        <p class="lead text-muted mb-5">Please select your access level to proceed to the management system.</p>
         
         <div class="row g-4 justify-content-center">
             <!-- Admin Selection -->
             <div class="col-md-5">
-                <a href="/login/admin" class="text-decoration-none shadow-hover h-100">
-                    <div class="card h-100 border-0 shadow-sm py-5 px-4 transition-transform">
-                        <div class="display-1 text-primary mb-3">
-                            <i class="bi bi-shield-lock"></i>
+                <a href="/login/admin" class="role-card-link">
+                    <div class="card h-100 border-0 shadow-sm py-5 px-4 text-center">
+                        <div class="role-icon-wrapper mb-4 mx-auto">
+                            <i class="bi bi-shield-lock-fill text-primary"></i>
                         </div>
-                        <h3 class="fw-bold">Administrator</h3>
-                        <p class="text-muted">Upload and manage templates, view system-wide history.</p>
-                        <div class="btn btn-primary mt-3">Admin Login</div>
+                        <h3 class="fw-bold h4">Admin Login</h3>
+                        <p class="text-muted small mb-4">Manage templates, system configuration, and view comprehensive history.</p>
+                        <div class="btn btn-dark w-100">Access Admin Dashboard</div>
                     </div>
                 </a>
             </div>
             
             <!-- User Selection -->
             <div class="col-md-5">
-                <a href="/login/user" class="text-decoration-none shadow-hover h-100">
-                    <div class="card h-100 border-0 shadow-sm py-5 px-4 transition-transform">
-                        <div class="display-1 text-success mb-3">
-                            <i class="bi bi-person-badge"></i>
+                <a href="/login/user" class="role-card-link">
+                    <div class="card h-100 border-0 shadow-sm py-5 px-4 text-center">
+                        <div class="role-icon-wrapper mb-4 mx-auto bg-soft-success">
+                            <i class="bi bi-person-workspace text-success"></i>
                         </div>
-                        <h3 class="fw-bold">Standard User</h3>
-                        <p class="text-muted">View existing templates and generate new documents.</p>
-                        <div class="btn btn-success mt-3">User Login</div>
+                        <h3 class="fw-bold h4">User Login</h3>
+                        <p class="text-muted small mb-4">Search templates, generate documents, and track personal report history.</p>
+                        <div class="btn btn-primary w-100">Access User Portal</div>
                     </div>
                 </a>
             </div>
         </div>
 
         <div class="mt-5 pt-4">
-            <p class="text-muted">Don't have an account yet? <a href="/register" class="text-primary fw-bold">Register as a new user</a></p>
+            <p class="text-muted">New staff member? <a href="/register" class="text-primary fw-bold text-decoration-none">Create a new user account</a></p>
         </div>
     </div>
 </div>
 
 <style>
-    .transition-transform {
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    .role-card-link {
+        text-decoration: none;
+        display: block;
+        transition: transform 0.2s ease;
     }
-    .card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    .role-card-link:hover {
+        transform: translateY(-8px);
+    }
+    .role-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        background-color: #f1f5f9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+    .bg-soft-success {
+        background-color: #f0fdf4;
+    }
+    .card {
+        transition: box-shadow 0.2s ease;
+    }
+    .role-card-link:hover .card {
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
     }
 </style>

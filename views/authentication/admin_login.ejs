@@ -1,32 +1,51 @@
-<div class="row justify-content-center">
-    <div class="col-md-6 pt-5">
-        <div class="card shadow border-0 mt-5">
-            <div class="card-header bg-dark text-white text-center py-4">
-                <div class="mb-2"><i class="bi bi-shield-lock display-4"></i></div>
-                <h4 class="mb-0">Administrator Login</h4>
-                <p class="small text-muted mb-0">System Management & Templates</p>
+<div class="row justify-content-center py-5">
+    <div class="col-md-5 mt-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white text-center py-4 border-0">
+                <div class="mb-2"><i class="bi bi-shield-lock-fill display-4 text-info"></i></div>
+                <h2 class="h4 mb-0 text-white">Admin Login</h2>
+                <p class="small opacity-75 mb-0">Authorized Personnel Only</p>
             </div>
             <div class="card-body p-4 p-md-5">
                 <% if (typeof error !== 'undefined' && error) { %>
-                    <div class="alert alert-danger mb-4"><%= error %></div>
+                    <div class="alert alert-danger d-flex align-items-center mb-4 small">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <div><%= error %></div>
+                    </div>
                 <% } %>
                 
                 <form action="/login/admin" method="POST">
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Admin Username</label>
-                        <input type="text" name="username" id="username" class="form-control form-control-lg" placeholder="e.g. admin" required autofocus>
+                    <div class="mb-4">
+                        <label for="username" class="form-label small fw-bold text-uppercase tracking-wider">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-person"></i></span>
+                            <input type="text" name="username" id="username" class="form-control bg-light border-0 py-2" placeholder="Admin username" required autofocus>
+                        </div>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" id="password" class="form-control form-control-lg" required>
+                        <label for="password" class="form-label small fw-bold text-uppercase tracking-wider">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="bi bi-key"></i></span>
+                            <input type="password" name="password" id="password" class="form-control bg-light border-0 py-2" required>
+                        </div>
                     </div>
-                    <div class="d-grid gap-3">
-                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Login as Administrator</button>
-                        <a href="/select-role" class="btn btn-outline-secondary">Go Back to Role Selection</a>
+                    <div class="d-grid gap-3 pt-2">
+                        <button type="submit" class="btn btn-dark btn-lg shadow-sm">Sign In as Admin</button>
+                        <a href="/login" class="btn btn-link text-muted text-decoration-none small">
+                            <i class="bi bi-arrow-left me-1"></i> Back to Role Selection
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
-        <p class="text-center mt-4 text-muted small">Access Restricted: Only authorized administrators may log in here.</p>
+        <div class="text-center mt-4">
+            <p class="text-muted extra-small">Security Note: All login attempts are logged for auditing purposes.</p>
+        </div>
     </div>
 </div>
+
+<style>
+    .tracking-wider { letter-spacing: 0.05em; }
+    .extra-small { font-size: 0.75rem; }
+    .input-group-text { color: var(--text-body); }
+</style>

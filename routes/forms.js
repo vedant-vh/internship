@@ -13,7 +13,11 @@ router.get('/:templateId', async (req, res) => {
 
     if (!template) return res.status(404).send('Template not found');
 
-    const formFields = generateFormDefinition(template.fields);
+    const TemplateParser = require('../services/templateParser');
+    const parser = new TemplateParser(template.templateFile);
+    const structure = await parser.extractFullStructure();
+
+    const formFields = generateFormDefinition(template.fields, structure.loop_tables || []);
 
     res.render('form_builder/dynamic_form', { template, form_fields: formFields });
 });

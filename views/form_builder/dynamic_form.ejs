@@ -29,9 +29,9 @@
                                                     <th style="width: 50px;"></th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
+                                            <tbody class="table-item-group">
                                                 <tr class="table-row">
-                                                    <% field.columns.forEach(col => { %>
+                                                     <% field.columns.forEach(col => { %>
                                                          <td>
                                                             <% if (col.type && col.type.startsWith('select:')) { 
                                                                 const options = col.type.split(':')[1].split(',');
@@ -46,11 +46,24 @@
                                                                 <%# Hidden input so the key exists in the JSON row; renderer auto-fills the value %>
                                                                 <input type="hidden" name="<%= field.name %>_<%= col.name %>[]" value="">
                                                                 <span class="badge bg-secondary px-3 py-2 d-block text-center" title="Auto-generated">Auto</span>
-                                                            <% } else if (col.type === 'textarea') { %>
-                                                                <textarea class="form-control form-control-sm" name="<%= field.name %>_<%= col.name %>[]" rows="1"></textarea>
-                                                            <% } else { %>
+                                                            <% } else if (col.type === 'timerange') { %>
+                                                                <div class="d-flex align-items-center gap-1 timerange-container">
+                                                                    <input type="time" class="form-control form-control-sm timerange-from" title="From">
+                                                                    <span class="text-muted small px-1">to</span>
+                                                                    <input type="time" class="form-control form-control-sm timerange-to" title="To">
+                                                                    <input type="hidden" name="<%= field.name %>_<%= col.name %>[]" class="timerange-combined">
+                                                                </div>
+                                                            <% } else if (col.type === 'textarea' || (col.label && (col.label.toLowerCase().includes('roll no') || col.label.toLowerCase().includes('name') || col.label.toLowerCase().includes('guide')))) { 
+                                                                const isLong = col.label.toLowerCase().includes('roll no') || col.label.toLowerCase().includes('name') || col.label.toLowerCase().includes('guide');
+                                                                const rowCount = isLong ? 3 : 1;
+                                                             %>
+                                                                <textarea class="form-control form-control-sm auto-expand" 
+                                                                          name="<%= field.name %>_<%= col.name %>[]" 
+                                                                          rows="<%= rowCount %>"
+                                                                          oninput="autoResize(this)"></textarea>
+                                                             <% } else { %>
                                                                 <input type="<%= col.type || 'text' %>" class="form-control form-control-sm" name="<%= field.name %>_<%= col.name %>[]">
-                                                            <% } %>
+                                                             <% } %>
                                                         </td>
                                                     <% }) %>
                                                     <td class="text-center">
@@ -59,6 +72,36 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+                                                <% if (field.subTables && field.subTables.length > 0) { %>
+                                                    <tr class="sub-table-row bg-light">
+                                                        <td colspan="100%" class="p-3">
+                                                            <% field.subTables.forEach(sub => { %>
+                                                                <div class="sub-table-container border rounded bg-white p-3 mb-3 shadow-sm" data-subtable-name="<%= sub.name %>">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                        <h6 class="mb-0 text-primary"><i class="bi bi-diagram-3 pe-1"></i> <%= sub.label %></h6>
+                                                                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addSubRow(this, '<%= sub.name %>')">+ Add <%= sub.label %></button>
+                                                                    </div>
+                                                                    <table class="table table-sm table-bordered mb-0">
+                                                                        <thead class="bg-light"><tr>
+                                                                            <% sub.columns.forEach(scol => { %>
+                                                                                <th><small><%= scol.label %></small></th>
+                                                                            <% }) %>
+                                                                            <th style="width:40px;"></th>
+                                                                        </tr></thead>
+                                                                        <tbody>
+                                                                            <tr class="sub-row">
+                                                                                <% sub.columns.forEach(scol => { %>
+                                                                                    <td><input type="<%= scol.type || 'text' %>" class="form-control form-control-sm" name="<%= sub.name %>_<%= scol.name %>[]"></td>
+                                                                                <% }) %>
+                                                                                <td class="text-center"><button type="button" class="btn btn-none p-0 text-danger" onclick="removeSubRow(this)">&times;</button></td>
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            <% }) %>
+                                                        </td>
+                                                    </tr>
+                                                <% } %>
                                             </tbody>
                                         </table>
                                     </div>
@@ -67,7 +110,7 @@
                             <% } else if (field.type === 'textarea') { %>
                                 <div class="col-12">
                                     <label class="form-label fw-bold"><%= field.label %></label>
-                                    <textarea name="<%= field.name %>" class="form-control" rows="3"></textarea>
+                                    <textarea name="<%= field.name %>" class="form-control auto-expand" rows="3" oninput="autoResize(this)"></textarea>
                                 </div>
                             <% } else if (field.type && field.type.startsWith('select:')) { 
                                 const options = field.type.split(':')[1].split(',');
@@ -90,9 +133,12 @@
                         <% }) %>
                     </div>
 
-                    <div class="mt-5 pt-3 border-top d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg shadow">
-                            Generate Document
+                    <div class="mt-5 pt-3 border-top d-flex gap-3 justify-content-end">
+                        <button type="submit" name="action" value="preview" class="btn btn-outline-info btn-lg shadow-sm px-md-5">
+                            <i class="bi bi-eye"></i> Generate & Preview
+                        </button>
+                        <button type="submit" name="action" value="download" class="btn btn-primary btn-lg shadow px-md-5">
+                            <i class="bi bi-download"></i> Generate & Download
                         </button>
                     </div>
 
@@ -102,41 +148,112 @@
     </div>
 </div>
 
+<style>
+    /* Auto-expand styles */
+    textarea.auto-expand {
+        resize: none;
+        overflow: hidden;
+        min-height: 38px;
+        transition: height 0.1s ease;
+    }
+    
+    .timerange-container .form-control {
+        min-width: 85px;
+        padding: 0.25rem 0.4rem;
+    }
+</style>
+
 <script>
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // Initialize on page load
+    window.addEventListener('load', () => {
+        document.querySelectorAll('textarea.auto-expand').forEach(textarea => {
+            if (textarea.value) autoResize(textarea);
+        });
+    });
+
     function addRow(tableName) {
         const table = document.getElementById('table-' + tableName);
-        const tbody = table.querySelector('tbody');
-        const firstRow = tbody.querySelector('.table-row');
-        const newRow = firstRow.cloneNode(true);
+        const groups = table.querySelectorAll(':scope > tbody.table-item-group');
+        const firstGroup = groups[0];
+        const newGroup = firstGroup.cloneNode(true);
         
-        // Clear inputs
-        newRow.querySelectorAll('input, textarea, select').forEach(input => input.value = '');
+        newGroup.querySelectorAll('input, textarea, select').forEach(input => {
+            input.value = '';
+            if (input.tagName.toLowerCase() === 'textarea') {
+                input.style.height = ''; 
+            }
+        });
         
-        // Remove any date helper from cloned row
-        newRow.querySelectorAll('.date-helper').forEach(h => h.remove());
+        newGroup.querySelectorAll('.date-helper').forEach(h => h.remove());
+        newGroup.querySelectorAll('.timerange-combined').forEach(h => h.value = '');
 
-        tbody.appendChild(newRow);
+        newGroup.querySelectorAll('.sub-table-container').forEach(container => {
+            const tbody = container.querySelector('tbody');
+            const subRows = tbody.querySelectorAll('.sub-row');
+            for(let i=1; i<subRows.length; i++) {
+                subRows[i].remove();
+            }
+        });
+
+        table.appendChild(newGroup);
     }
 
     function removeRow(btn) {
-        const rows = btn.closest('tbody').querySelectorAll('.table-row');
+        const table = btn.closest('table.root-table') || btn.closest('table[id^="table-"]');
+        const groups = table.querySelectorAll(':scope > tbody.table-item-group');
+        if (groups.length > 1) {
+            btn.closest('tbody.table-item-group').remove();
+        }
+    }
+
+    function addSubRow(btn, subName) {
+        const container = btn.closest('.sub-table-container');
+        const tbody = container.querySelector('tbody');
+        const firstRow = tbody.querySelector('.sub-row');
+        const newRow = firstRow.cloneNode(true);
+        newRow.querySelectorAll('input, textarea, select').forEach(i => { 
+            i.value = ''; 
+            if(i.tagName.toLowerCase() === 'textarea') i.style.height = ''; 
+        });
+        tbody.appendChild(newRow);
+    }
+
+    function removeSubRow(btn) {
+        const tbody = btn.closest('tbody');
+        const rows = tbody.querySelectorAll('.sub-row');
         if (rows.length > 1) {
-            btn.closest('tr').remove();
+            btn.closest('.sub-row').remove();
         }
     }
 
     document.getElementById('dynamic-form').addEventListener('submit', function(e) {
-        // Find all tables and stringify their data into hidden inputs
+        document.querySelectorAll('.timerange-container').forEach(container => {
+            const from = container.querySelector('.timerange-from').value;
+            const to = container.querySelector('.timerange-to').value;
+            const combinedInput = container.querySelector('.timerange-combined');
+            if (from && to) combinedInput.value = `${from} to ${to}`;
+            else if (from || to) combinedInput.value = from || to;
+            else combinedInput.value = '';
+        });
+
         const tables = document.querySelectorAll('table[id^="table-"]');
         
         tables.forEach(table => {
+            if (table.closest('.sub-table-container')) return;
+
             const tableName = table.id.replace('table-', '');
             const tableData = [];
-            const rows = table.querySelectorAll('.table-row');
+            const itemGroups = table.querySelectorAll(':scope > tbody.table-item-group');
             
-            rows.forEach(row => {
+            itemGroups.forEach(group => {
                 const rowObj = {};
-                const inputs = row.querySelectorAll('input, textarea, select');
+                const mainRow = group.querySelector(':scope > .table-row');
+                const inputs = mainRow.querySelectorAll('input, textarea, select');
                 
                 inputs.forEach(input => {
                     const nameAttr = input.getAttribute('name');
@@ -146,19 +263,45 @@
                     }
                 });
 
-                // Only push rows where at least one NON-srno column has data
+                const subTablesContainers = group.querySelectorAll('.sub-table-container');
+                subTablesContainers.forEach(sub => {
+                    const subName = sub.getAttribute('data-subtable-name');
+                    const subTableNameLocal = subName.includes('.') ? subName.split('.').pop() : subName;
+                    const subData = [];
+                    const subRows = sub.querySelectorAll('.sub-row');
+                    
+                    subRows.forEach(sr => {
+                        const srObj = {};
+                        const srInputs = sr.querySelectorAll('input, select, textarea');
+                        srInputs.forEach(input => {
+                            const nameAttr = input.getAttribute('name');
+                            if (nameAttr && nameAttr.startsWith(subName + '_')) {
+                                const colName = nameAttr.substring(subName.length + 1).replace('[]', '');
+                                srObj[colName] = input.value;
+                            }
+                        });
+                        const realSubValues = Object.entries(srObj)
+                            .filter(([col]) => !col.match(/^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i))
+                            .map(([, v]) => v);
+                        if (realSubValues.some(val => val && val.trim() !== '')) {
+                            subData.push(srObj);
+                        }
+                    });
+                    
+                    rowObj[subTableNameLocal] = subData;
+                });
+
                 const realValues = Object.entries(rowObj)
-                    .filter(([col]) => !col.match(/^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i))
+                    .filter(([col, val]) => typeof val !== 'object' && !col.match(/^(sr[_.]?no\.?|s[_.]?no\.?|serial[_.]?no\.?|sr_?num|sno|sl[_.]?no\.?)$/i))
                     .map(([, v]) => v);
-                if (realValues.some(val => val.trim() !== '')) {
+                    
+                if (realValues.some(val => val && val.trim() !== '') || subTablesContainers.length > 0) {
                     tableData.push(rowObj);
                 }
             });
             
             const hiddenInput = document.getElementById('hidden-' + tableName);
-            if (hiddenInput) {
-                hiddenInput.value = JSON.stringify(tableData);
-            }
+            if (hiddenInput) hiddenInput.value = JSON.stringify(tableData);
         });
     });
 

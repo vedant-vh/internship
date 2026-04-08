@@ -72,7 +72,10 @@ router.get('/:id', async (req, res) => {
         where: { id: parseInt(req.params.id) },
         include: {
             fields: { orderBy: { id: 'asc' } },
-            generatedReports: { orderBy: { createdAt: 'desc' } }
+            generatedReports: {
+                where: req.user.role === 'ADMIN' ? {} : { createdById: req.user.id },
+                orderBy: { createdAt: 'desc' }
+            }
         }
     });
     if (!template) return res.status(404).send('Report template not found');
@@ -93,6 +96,41 @@ router.post('/:id/delete', isAdmin, async (req, res) => {
     } catch (error) {
         console.error('Error deleting report template:', error);
         res.status(500).send('Error deleting report template');
+    }
+});
+
+// Rename (admin only)
+router.post('/:id/rename', isAdmin, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const { newName } = req.body;
+        if (!newName || newName.trim() === '') {
+            return res.status(400).send('New name is required');
+        }
+        await prisma.reportTemplate.update({
+            where: { id },
+            data: { name: newName.trim() }
+        });
+        res.redirect('/report-templates');
+    } catch (error) {
+        console.error('Error renaming report template:', error);
+        res.status(500).send('Error renaming report template');
+    }
+});
+
+router.get('/:id/download', isAdmin, async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        const template = await prisma.reportTemplate.findUnique({ where: { id } });
+        if (!template) return res.status(404).send('Template not found');
+        
+        const fullPath = path.join(process.cwd(), template.templateFile);
+        if (!fs.existsSync(fullPath)) return res.status(404).send('File missing on disk');
+        
+        res.download(fullPath);
+    } catch (error) {
+        console.error('Error downloading template:', error);
+        res.status(500).send('Error downloading template');
     }
 });
 

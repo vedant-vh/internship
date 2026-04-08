@@ -1,39 +1,46 @@
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm border-0 mt-5">
-            <div class="card-header bg-dark text-white text-center py-3">
-                <h4 class="mb-0">Portal Registration</h4>
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 mt-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white text-center py-4 border-0">
+                <h2 class="h4 mb-0 text-white">Portal Registration</h2>
+                <p class="small opacity-75 mb-0">Create your professional account</p>
             </div>
-            <div class="card-body p-4">
+            <div class="card-body p-4 p-md-5">
                 <form action="/register" method="POST">
-                    <div class="row g-3 mb-3">
+                    <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label for="firstName" class="form-label">First Name</label>
-                            <input type="text" name="firstName" id="firstName" class="form-control">
+                            <label for="firstName" class="form-label small fw-bold text-uppercase tracking-wider">First Name</label>
+                            <input type="text" name="firstName" id="firstName" class="form-control bg-light border-0 py-2" placeholder="First Name">
                         </div>
                         <div class="col-md-6">
-                            <label for="lastName" class="form-label">Last Name</label>
-                            <input type="text" name="lastName" id="lastName" class="form-control">
+                            <label for="lastName" class="form-label small fw-bold text-uppercase tracking-wider">Last Name</label>
+                            <input type="text" name="lastName" id="lastName" class="form-control bg-light border-0 py-2" placeholder="Last Name">
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" name="username" id="username" class="form-control" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email address</label>
-                        <input type="email" name="email" id="email" class="form-control" required>
                     </div>
                     <div class="mb-4">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" name="password" id="password" class="form-control" required>
+                        <label for="username" class="form-label small fw-bold text-uppercase tracking-wider">Username</label>
+                        <input type="text" name="username" id="username" class="form-control bg-light border-0 py-2" placeholder="Choose a username" required>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary py-2">Create Account</button>
-                        <a href="/login/user" class="btn btn-link">Already have an account? Login</a>
+                    <div class="mb-4">
+                        <label for="email" class="form-label small fw-bold text-uppercase tracking-wider">Email Address</label>
+                        <input type="email" name="email" id="email" class="form-control bg-light border-0 py-2" placeholder="user@email.com" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label small fw-bold text-uppercase tracking-wider">Password</label>
+                        <input type="password" name="password" id="password" class="form-control bg-light border-0 py-2" placeholder="••••••••" required>
+                    </div>
+                    <div class="d-grid gap-3 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">Create Account</button>
+                        <a href="/login/user" class="btn btn-link text-muted text-decoration-none small text-center">
+                            Already have an account? <span class="text-primary fw-bold">Sign In</span>
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .tracking-wider { letter-spacing: 0.05em; }
+</style>

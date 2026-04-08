@@ -36,9 +36,19 @@ function formatDate(val, includeDay = false) {
 }
 
 function formatTime(val) {
+    if (typeof val !== 'string') return val;
+    
+    // Handle time ranges (e.g. "10:00 to 12:00")
+    if (val.includes(' to ')) {
+        return val.split(' to ')
+            .map(t => formatTime(t))
+            .join(' to ');
+    }
+
     try {
-        if (typeof val === 'string' && val.includes(':')) {
+        if (val.includes(':')) {
             let [hours, mins] = val.split(':').map(Number);
+            if (isNaN(hours) || isNaN(mins)) return val;
             const ampm = hours >= 12 ? 'PM' : 'AM';
             hours = hours % 12 || 12;
             return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')} ${ampm}`;
@@ -126,6 +136,9 @@ class ReportRenderer {
         // but have NO formatting/layout elements in between.
         // This is the #1 fix for docxtemplater "tag seen" issues.
         xml = xml.replace(/<\/w:t><\/w:r><w:r(?: [^>]*)*>(?:<w:rPr(?:>.*?<\/w:rPr>|[^>]*\/>))?<w:t(?: [^>]*)*>/g, '');
+        
+        // 3. Remove "exact" row height constraints in tables so rows automatically scale to fit content quantity
+        xml = xml.replace(/(\s)w:hRule="exact"/gi, '$1w:hRule="auto"');
         
         return xml;
     }

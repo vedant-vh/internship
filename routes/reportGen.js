@@ -83,6 +83,9 @@ router.post('/:templateId', upload.any(), async (req, res) => {
             });
         }
 
+        const action = req.body.action;
+        delete context.action;
+
         // Merge image groups into context
         Object.assign(context, groupedImages);
 
@@ -90,6 +93,19 @@ router.post('/:templateId', upload.any(), async (req, res) => {
         const outputPath = await renderer.renderReport(template.templateFile, context, template.fields);
 
         if (!outputPath) return res.status(500).send('Error generating report');
+
+        if (action === 'preview') {
+            const result = await mammoth.convertToHtml({ path: outputPath });
+            // Delete the temporary file right away to preserve disk space
+            if (fs.existsSync(outputPath)) {
+                fs.unlinkSync(outputPath);
+            }
+            return res.render('reports/report_preview', {
+                html: result.value,
+                title: 'Report Preview',
+                fileName: 'Temporary Preview Only (Not Saved)'
+            });
+        }
 
         // Save to report history
         const relativePath = path.relative(process.cwd(), outputPath).replace(/\\/g, '/');
